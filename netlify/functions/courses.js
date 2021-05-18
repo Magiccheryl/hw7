@@ -89,8 +89,9 @@ exports.handler = async function(event) {
     // get the documents from the query
     let reviews = reviewsQuery.docs
 
-    // create parameters for total rating of the section and set the initial value to 0
+    // create parameter for total rating of the section and course, and set the initial value to 0
     let totalSectionRating = 0
+    let totalCourseRating = 0
 
     // create a new object to store review information
     let reviewObject = {
@@ -129,17 +130,27 @@ exports.handler = async function(event) {
     courseData.sections.push(sectionData)
 
 
+    // create parameters for total number reviews of the course and set the initial value to 0
+    let totalCourseReviews = 0    
+
+    // calculate the total number reviews for the course
+    totalCourseReviews = reviews.length * sections.length
+
+    // add the number reviews to the course's data
+    courseData.totalCourseReviews = totalCourseReviews
+
+    // calculate the total rating for the course (Sorry I really don't know how to sum the rating for 2 sections)
+    totalCourseRating = totalSectionRating * sections.length
 
     // calculate the average rating for the course
-    let averageCourseRating = averageSectionRating/sections.length
+    let averageCourseRating = totalCourseRating/totalCourseReviews
 
     // add the ratings to the course's data
     courseData.averageCourseRating = averageCourseRating
 
   } // end of loop for sections
-
-
-  // return the standard response
+  
+    // return the standard response
   return {
     statusCode: 200,
     body: JSON.stringify(courseData)
