@@ -65,12 +65,12 @@ exports.handler = async function(event) {
   let sections = sectionsQuery.docs
 
   // loop through the documents
-  for (let i=0; i < sections.length; i++) {
+  for (let sectionIndex=0; sectionIndex < sections.length; sectionIndex++) {
     // get the document ID of the section
-    let sectionId = sections[i].id
+    let sectionId = sections[sectionIndex].id
 
     // get the data from the section
-    let sectionData = sections[i].data()
+    let sectionData = sections[sectionIndex].data()
 
     // ask Firebase for the lecturer with the ID provided by the section; hint: read "Retrieve One Document (when you know the Document ID)" in the reference
     let lecturerQuery = await db.collection('lecturers').doc(sectionData.lecturerId).get()
@@ -81,11 +81,63 @@ exports.handler = async function(event) {
     // add the lecturer's name to the section's data
     sectionData.lecturerName = lecturer.name
 
+    // 🔥 your code for the reviews/ratings goes here
+  
+    // ask Firebase for the reviews corresponding to the section ID of the course, wait for the response
+    let reviewsQuery = await db.collection('reviews').where(`sectionId`, `==`, sectionId).get()
+
+    // get the documents from the query
+    let reviews = reviewsQuery.docs
+
+    // create parameters for total rating of the section and set the initial value to 0
+    let totalSectionRating = 0
+
+    // create a new object to store review information
+    let reviewObject = {
+      averageSectionRating: [],
+      numberOfSectionRating:[],
+      review:[]
+    }
+
+    // loop through all the reviews for the section
+    for (let reviewIndex=0; reviewIndex < reviews.length; reviewIndex++) {
+      
+      // get the data from the reviews
+      let reviewData = reviews[reviewIndex].data()
+
+      // calculate the total section rating
+      totalSectionRating = totalSectionRating + reviewData.rating
+
+      // add the review content to the reviewData
+      reviewObject.review.push(reviewData.body)
+
+      // add the review to the section's data
+      sectionData.review = reviewObject
+
+    } // end of loop for reviews
+
+    // calculate the average rating for the section
+    averageSectionRating = totalSectionRating/reviews.length
+
+    // add the average rating to the reviewData
+    reviewObject.averageSectionRating.push(averageSectionRating)
+      
+    // add the number of rating to the reviewData
+    reviewObject.numberOfSectionRating.push(reviews.length)
+
     // add the section data to the courseData
     courseData.sections.push(sectionData)
 
-    // 🔥 your code for the reviews/ratings goes here
-  }
+
+
+    // calculate the average rating for the course
+    let averageCourseRating = averageSectionRating/sections.length
+
+    // add the ratings to the course's data
+    courseData.averageCourseRating = averageCourseRating
+
+  } // end of loop for sections
+
 
   // return the standard response
   return {
