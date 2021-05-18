@@ -115,6 +115,9 @@ exports.handler = async function(event) {
       // add the review to the section's data
       sectionData.review = reviewObject
 
+      // calculate the total course rating (I really have no idea how to sum the rating of 2 sections that I created)
+      totalCourseRating = totalSectionRating * sections.length
+
     } // end of loop for reviews
 
     // calculate the average rating for the section
@@ -139,8 +142,6 @@ exports.handler = async function(event) {
     // add the number reviews to the course's data
     courseData.totalCourseReviews = totalCourseReviews
 
-    // calculate the total rating for the course (Sorry I really don't know how to sum the rating for 2 sections)
-    totalCourseRating = totalSectionRating * sections.length
 
     // calculate the average rating for the course
     let averageCourseRating = totalCourseRating/totalCourseReviews
@@ -150,7 +151,7 @@ exports.handler = async function(event) {
 
   } // end of loop for sections
   
-    // return the standard response
+  // return the standard response
   return {
     statusCode: 200,
     body: JSON.stringify(courseData)
